@@ -5,15 +5,7 @@ pipeline {
         stage('Trigger Flask App') {
             steps {
                 script {
-                     // Get the branch name of the commit performed
-                    def branchName = env.BRANCH_NAME
-
-                    // Get the commit hash of the commit performed
-                    def commitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
-
-                    // Get the branch name in which the build is committing
-                    def committingBranch = env.CHANGE_BRANCH
-
+                    
                     echo "Branch Name of the Commit Performed: ${branchName}"
                     echo "Commit Hash of the Commit Performed: ${commitHash}"
                     echo "Branch Name in Which the Build is Committing: ${committingBranch}"
