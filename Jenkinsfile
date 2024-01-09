@@ -1,37 +1,58 @@
-User
 pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                // Step 1: Checkout a project from a Git repo
-               sh 'git clone https://github.com/darioamorosodaragona-tuni/LogicalCouplingTool.git'
-               //checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/darioamorosodaragona-tuni/LogicalCouplingTool.git']])
-            }
-        }
-
-        stage('Install Dependencies') {
-            steps {
-                // Step 2: Install Python packages from requirements.txt
-                sh 'cd LogicalCouplingTool'
-                sh 'pip install -r requirements.txt'
-            }
-        }
-
-        stage('Run Script1') {
+        stage('Trigger Flask App') {
             steps {
                 script {
-                    // Step 3: Run script1.py with arguments and capture exit code and output
-                    def scriptOutput = sh(script: "python LogicalCouplingNoDb/src/logical_coupling.py --repo_url ${env.GIT_URL} --branch_name ${env.BRANCH_NAME} --commit_hash ${env.GIT_COMMIT}", returnStatus: true, returnStdout: true)
+                     // Get the branch name of the commit performed
+                    def branchName = env.BRANCH_NAME
 
-                    // Step 4: Save the exit code and output
-                    env.SCRIPT_EXIT_CODE = scriptOutput.exitCode
-                    env.SCRIPT_OUTPUT = scriptOutput.stdout.trim()
+                    // Get the commit hash of the commit performed
+                    def commitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
 
-                    // Step 5: Fail the stage if the exit code is 1
-                    if (env.SCRIPT_EXIT_CODE == 1) {
-                        error "Script1 failed with exit code 1."
+                    // Get the branch name in which the build is committing
+                    def committingBranch = env.CHANGE_BRANCH
+
+                    echo "Branch Name of the Commit Performed: ${branchName}"
+                    echo "Commit Hash of the Commit Performed: ${commitHash}"
+                    echo "Branch Name in Which the Build is Committing: ${committingBranch}"
+
+
+                    // Replace the URL with the actual URL of your Flask app
+                    def flaskAppUrl = 'http://darioserver.duckdns.org:5001/logical-coupling'
+                    
+                    // Example parameters to pass to the Flask app
+                            // Get the repository URL
+                    def repoUrl = env.GIT_URL
+
+                    // Get the commit hash
+                    def commitHash = env.GIT_COMMIT
+
+                    // Get the branch name
+                    def branchName = env.BRANCH_NAME
+                    
+                    // Use curl to make an HTTP request to the Flask app
+                    def response = sh(script: "curl -X GET ${flaskAppUrl}?git_url=${repoUrl}&commit_hash=${commitHash}&branch=${branchName}", returnStdout: true).trim()
+
+
+                    echo "Raw Response from Flask App: ${response}"
+
+                    // Parse the JSON response
+                    def jsonResponse = readJSON text: response
+
+                    // Access exit code and message from the JSON response
+                    def exitCode = jsonResponse.exit_code
+                    def message = jsonResponse.message
+
+                    echo "Exit Code: ${exitCode}"
+                    echo "Message: ${message}"
+
+                    // Determine whether the stage should pass or fail
+                    if (exitCode == 0) {
+                        echo "Stage passed."
+                    } else {
+                        error "Stage failed. Exit Code: ${exitCode}, Message: ${message}"
                     }
                 }
             }
@@ -40,8 +61,7 @@ pipeline {
 
     post {
         always {
-            // Display the script output
-            echo "Script Output: ${env.SCRIPT_OUTPUT}"
+            // Any cleanup or final steps
         }
     }
 }
