@@ -6,7 +6,8 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Step 1: Checkout a project from a Git repo
-               checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/darioamorosodaragona-tuni/LogicalCouplingTool.git']])
+               sh 'git clone https://github.com/darioamorosodaragona-tuni/LogicalCouplingTool.git'
+               //checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/darioamorosodaragona-tuni/LogicalCouplingTool.git']])
             }
         }
 
@@ -22,7 +23,7 @@ pipeline {
             steps {
                 script {
                     // Step 3: Run script1.py with arguments and capture exit code and output
-                    def scriptOutput = sh(script: "python logical_coupling.py ${env.GIT_URL} ${env.BRANCH_NAME} ${env.GIT_COMMIT}", returnStatus: true, returnStdout: true)
+                    def scriptOutput = sh(script: "python LogicalCouplingNoDb/src/logical_coupling.py --repo_url ${env.GIT_URL} --branch_name ${env.BRANCH_NAME} --commit_hash ${env.GIT_COMMIT}", returnStatus: true, returnStdout: true)
 
                     // Step 4: Save the exit code and output
                     env.SCRIPT_EXIT_CODE = scriptOutput.exitCode
