@@ -5,11 +5,7 @@ pipeline {
         stage('Logical Coupling') {
             steps {
                 script {
-                    
-                    echo "Branch Name of the Commit Performed: ${branchName}"
-                    echo "Commit Hash of the Commit Performed: ${commitHash}"
-                    echo "Branch Name in Which the Build is Committing: ${committingBranch}"
-
+            
 
                     // Replace the URL with the actual URL of your Flask app
                     def flaskAppUrl = 'http://darioserver.duckdns.org:5001/logical-coupling'
