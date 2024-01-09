@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-        stage('Trigger Flask App') {
+        stage('Logical Coupling') {
             steps {
                 script {
                     
@@ -22,7 +22,8 @@ pipeline {
                     def commitHash = env.GIT_COMMIT
 
                     // Get the branch name
-                    def branchName = env.BRANCH_NAME
+                    def branchName = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+
                     
                     // Use curl to make an HTTP request to the Flask app
                     def response = sh(script: "curl -X GET ${flaskAppUrl}?git_url=${repoUrl}&commit_hash=${commitHash}&branch=${branchName}", returnStdout: true).trim()
