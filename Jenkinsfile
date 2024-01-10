@@ -9,20 +9,29 @@ pipeline {
         stage('Logical Coupling') {
             steps {
                 script {
-                    executeCouplingStage('logical-coupling')
+                    try {
+                        
+                        executeCouplingStage('logical-coupling')
+
+                    }
+                    
+                    catchError(buildResult: 'FAILURE', stageResult: 'SUCCESS'){}
                 }
             }
-            post {
-                always {
-                    echo "Post-build actions after Logical Coupling stage"
-                }
-            }
+      
         }
 
         stage('Developer Coupling') {
             steps {
                 script {
-                    executeCouplingStage('developer-coupling')
+                    try {
+                    
+                        executeCouplingStage('developer-coupling')
+                    
+                    }
+                    
+                    catchError(buildResult: 'FAILURE', stageResult: 'SUCCESS'){}
+
                 }
             }
         }
