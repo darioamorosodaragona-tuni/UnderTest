@@ -9,7 +9,7 @@ pipeline {
         stage('Logical Coupling') {
             steps {
                 script {
-                    catchError(buildResult: 'FAILURE', stageResult: 'SUCCESS'){                        
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE'){                        
                         executeCouplingStage('logical-coupling')
                     }   
                 }
@@ -20,7 +20,7 @@ pipeline {
         stage('Developer Coupling') {
             steps {
                 script {
-                    catchError(buildResult: 'FAILURE', stageResult: 'SUCCESS'){
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE'){
                         executeCouplingStage('developer-coupling')
 
                     }
@@ -54,9 +54,7 @@ def executeCouplingStage(couplingType) {
     echo "Exit Code: ${exitCode}"
     echo "Message: ${message}"
 
-    if (exitCode == 0) {
-        echo "Stage passed."
-    } else {
+    if (exitCode != 0) {
         error "Stage failed. Exit Code: ${exitCode}, Message: ${message}"
     }
 }
