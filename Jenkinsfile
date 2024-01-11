@@ -16,9 +16,17 @@ pipeline {
                     def result
                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                         result = executeCouplingStage('logical-coupling')
+                        
+                        LOGICAL_EXIT_CODE = result ? result.exitCode : -500
+                        LOGICAL_MESSAGE = result ? result.message : 'Service not available'
+                        
+                        if (result.exitCode != 0) {
+                                error "Stage failed. Exit Code: ${exitCode}, Message: ${message}"
+                        }                       
+                    
+
+                    
                     }
-                    LOGICAL_EXIT_CODE = result ? result.exitCode : -500
-                    LOGICAL_MESSAGE = result ? result.message : 'Service not available'
                 }
             }
         }
@@ -29,9 +37,14 @@ pipeline {
                     def result
                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                         result = executeCouplingStage('developer-coupling')
+                        DEVELOPER_EXIT_CODE = result ? result.exitCode : -500
+                        DEVELOPER_MESSAGE = result ? result.message : 'Service not available'
+                        
+                        if (result.exitCode != 0) {
+                                error "Stage failed. Exit Code: ${exitCode}, Message: ${message}"
+                        }
                     }
-                    DEVELOPER_EXIT_CODE = result ? result.exitCode : -500
-                    DEVELOPER_MESSAGE = result ? result.message : 'Service not available'
+
                 }
             }
         }
@@ -42,8 +55,8 @@ pipeline {
             script {
 
 
-                    echo "LOGICAL_EXIT_CODE: ${LOGICAL_EXIT_CODE}"
-                    echo "DEVELOPER_EXIT_CODE: ${DEVELOPER_EXIT_CODE}"
+                echo "LOGICAL_EXIT_CODE: ${LOGICAL_EXIT_CODE}"
+                echo "DEVELOPER_EXIT_CODE: ${DEVELOPER_EXIT_CODE}"
 
 
                  if (LOGICAL_EXIT_CODE != 0 || DEVELOPER_EXIT_CODE != 0 ) {
@@ -116,9 +129,7 @@ def executeCouplingStage(couplingType) {
     echo "Exit Code: ${exitCode}"
     echo "Message: ${message}"
 
-    if (exitCode != 0) {
-        error "Stage failed. Exit Code: ${exitCode}, Message: ${message}"
-    }
+
 
     return [exitCode: exitCode, message: message]
 }
