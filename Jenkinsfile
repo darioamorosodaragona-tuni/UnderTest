@@ -1,6 +1,5 @@
 pipeline {
     agent any
-
     environment {
         FLASK_APP_URL = 'http://darioserver.duckdns.org:5001'
         LOGICAL_EXIT_CODE = -100
