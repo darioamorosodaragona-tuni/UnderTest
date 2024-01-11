@@ -1,0 +1,4 @@
+Jenkinsfile
+Jenkinsfile/*
+*Jenkinsfile
+/Jenkinsfile

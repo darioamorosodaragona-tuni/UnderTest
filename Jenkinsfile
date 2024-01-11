@@ -3,33 +3,86 @@ pipeline {
 
     environment {
         FLASK_APP_URL = 'http://darioserver.duckdns.org:5001'
+        LOGICAL_EXIT_CODE = -100
+        LOGICAL_MESSAGE = 'UNEXECUTED'
+        DEVELOPER_EXIT_CODE = -100
+        DEVELOPER_MESSAGE = 'UNEXECUTED'
     }
 
     stages {
         stage('Logical Coupling') {
             steps {
                 script {
-                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE'){                        
-                        executeCouplingStage('logical-coupling')
-                    }   
+                    def result
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        result = executeCouplingStage('logical-coupling')
+                    }
+                    LOGICAL_EXIT_CODE = result ? result.exitCode : -500
+                    LOGICAL_MESSAGE = result ? result.message : 'Service not available'
                 }
             }
-      
         }
 
         stage('Developer Coupling') {
             steps {
                 script {
-                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE'){
-                        executeCouplingStage('developer-coupling')
-
+                    def result
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        result = executeCouplingStage('developer-coupling')
                     }
-
+                    DEVELOPER_EXIT_CODE = result ? result.exitCode : -500
+                    DEVELOPER_MESSAGE = result ? result.message : 'Service not available'
                 }
             }
         }
     }
 
+    post {
+        always {
+            script {
+
+
+                    echo "LOGICAL_EXIT_CODE: ${LOGICAL_EXIT_CODE}"
+                    echo "DEVELOPER_EXIT_CODE: ${DEVELOPER_EXIT_CODE}"
+
+
+                 if (LOGICAL_EXIT_CODE != 0 || DEVELOPER_EXIT_CODE != 0 ) {
+                    currentBuild.result = 'FAILURE'
+                } else {
+                    currentBuild.result = 'SUCCESS'
+
+                }
+
+
+                def logicalFacts = [
+                    [name: "LogicalCouplingExitCode", template: "${LOGICAL_EXIT_CODE}"],
+                    [name: "LogicalCouplingNessage", template: "${LOGICAL_MESSAGE}"]
+                ]
+                def developerFacts = [
+                    [name: "DeveloperNewCommiExitCode", template: "${DEVELOPER_EXIT_CODE}"],
+                    [name: "DeveloperNewCommitMessage", template: "${DEVELOPER_MESSAGE}"]
+                ]
+
+                def facts
+
+                // If both stages are executed, format fact definitions with the values of each stage
+                if (LOGICAL_EXIT_CODE != -100 && DEVELOPER_EXIT_CODE != -100) {
+                    facts = logicalFacts + developerFacts
+
+                }
+                else if (LOGICAL_EXIT_CODE != -100){
+                    facts = logicalFacts
+                }
+                else if (DEVELOPER_EXIT_CODE != -100){
+                    facts = developerFacts
+                }
+
+                // Send notifications with exitCode and message from each stage
+                office365ConnectorSend webhookUrl: "https://abb.webhook.office.com/webhookb2/0bb87d12-694d-42e4-b1ac-8789abc7e2f9@372ee9e0-9ce0-4033-a64a-c07073a91ecd/IncomingWebhook/8c4d2fbdbad540c392bc80efafa429e4/c6c993a4-8ced-4242-9ad0-814f68c1bef7",
+                    factDefinitions: facts
+            }
+        }
+    }
 }
 
 def executeCouplingStage(couplingType) {
@@ -41,9 +94,18 @@ def executeCouplingStage(couplingType) {
     echo "Commit Hash: ${commitHash}"
     echo "Branch Name: ${branchName}"
 
-    def response = sh(script: """
-        curl -G -d 'git_url=${repoUrl}' -d 'commit_hash=${commitHash}' -d 'branch=${branchName}' ${FLASK_APP_URL}/${couplingType}
-    """, returnStdout: true).trim()
+    def response
+    try {
+        response = sh(script: """
+            curl -G -d 'git_url=${repoUrl}' -d 'commit_hash=${commitHash}' -d 'branch=${branchName}' ${FLASK_APP_URL}/${couplingType}
+        """, returnStdout: true).trim()
+    } catch (Exception e) {
+        return [exitCode: 500, message: 'Server did not respond']
+    }
+
+    if (response == null) {
+        return [exitCode: 500, message: 'Server response is null']
+    }
 
     echo "Raw Response from Flask App: ${response}"
 
@@ -57,4 +119,6 @@ def executeCouplingStage(couplingType) {
     if (exitCode != 0) {
         error "Stage failed. Exit Code: ${exitCode}, Message: ${message}"
     }
+
+    return [exitCode: exitCode, message: message]
 }
