@@ -66,7 +66,7 @@ pipeline {
                     currentBuild.result = 'SUCCESS'
                 }
 
-                if WEBHOOK_URL != "" {
+                if(WEBHOOK_URL != ""){
                     def logicalFacts = [
                         [name: "LogicalCouplingExitCode", template: "${LOGICAL_EXIT_CODE}"],
                         [name: "LogicalCouplingMessage", template: "${LOGICAL_MESSAGE}"],
