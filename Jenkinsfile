@@ -5,11 +5,11 @@ pipeline {
         FLASK_APP_URL = 'http://darioserver.duckdns.org:5001'
         LOGICAL_EXIT_CODE = -100
         LOGICAL_MESSAGE = 'UNEXECUTED'
-        LOGICAL_COMMITS = []
+        LOGICAL_COMMITS = ''
 
         DEVELOPER_EXIT_CODE = -100
         DEVELOPER_MESSAGE = 'UNEXECUTED'
-        DEVELOPER_COMMITS = []
+        DEVELOPER_COMMITS = ''
         WEBHOOK_URL = "https://abb.webhook.office.com/webhookb2/0bb87d12-694d-42e4-b1ac-8789abc7e2f9@372ee9e0-9ce0-4033-a64a-c07073a91ecd/IncomingWebhook/8c4d2fbdbad540c392bc80efafa429e4/c6c993a4-8ced-4242-9ad0-814f68c1bef7"
     }
 
@@ -24,7 +24,7 @@ pipeline {
 
                         LOGICAL_EXIT_CODE = result ? result.exitCode : -500
                         LOGICAL_MESSAGE = result ? result.message : 'Service not available'
-                        LOGICAL_COMMITS = results ? result.commits : []
+                        LOGICAL_COMMITS = results ? result.commits : ''
 
                         if (result.exitCode != 0) {
                                 error "Stage failed. Exit Code: ${exitCode}, Message: ${message}"
@@ -43,7 +43,7 @@ pipeline {
                         result = executeCouplingStage('developer-coupling', commits)
                         DEVELOPER_EXIT_CODE = result ? result.exitCode : -500
                         DEVELOPER_MESSAGE = result ? result.message : 'Service not available'
-                        DEVELOPER_COMMITS = results ? result.commits : []
+                        DEVELOPER_COMMITS = results ? result.commits : ''
 
                         if (result.exitCode != 0) {
                                 error "Stage failed. Exit Code: ${exitCode}, Message: ${message}"
