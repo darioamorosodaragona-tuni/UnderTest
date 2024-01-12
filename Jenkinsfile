@@ -24,7 +24,7 @@ pipeline {
 
                         LOGICAL_EXIT_CODE = result ? result.exitCode : -500
                         LOGICAL_MESSAGE = result ? result.message : 'Service not available'
-                        LOGICAL_COMMITS = results ? result.commits : ''
+                        LOGICAL_COMMITS = result ? result.commits : ''
 
                         if (result.exitCode != 0) {
                                 error "Stage failed. Exit Code: ${exitCode}, Message: ${message}"
@@ -43,7 +43,7 @@ pipeline {
                         result = executeCouplingStage('developer-coupling', commits)
                         DEVELOPER_EXIT_CODE = result ? result.exitCode : -500
                         DEVELOPER_MESSAGE = result ? result.message : 'Service not available'
-                        DEVELOPER_COMMITS = results ? result.commits : ''
+                        DEVELOPER_COMMITS = result ? result.commits : ''
 
                         if (result.exitCode != 0) {
                                 error "Stage failed. Exit Code: ${exitCode}, Message: ${message}"
@@ -92,7 +92,7 @@ pipeline {
                     }
 
                     // Send notifications with exitCode and message from each stage
-                    office365ConnectorSend webhookUrl: "",
+                    office365ConnectorSend webhookUrl: WEBHOOK_URL,
                         factDefinitions: facts
                 }
             }
