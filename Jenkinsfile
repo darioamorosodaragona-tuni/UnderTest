@@ -17,7 +17,7 @@ pipeline {
         stage('Logical Coupling') {
             steps {
                 script {
-                    def commits = sh(script: 'git log --pretty=format:"%H" origin/main..HEAD', returnStdout: true).trim().split('\n')
+                    def commits = sh(script: 'git rev-list ${previousCommit}..${currentCommit}', returnStdout: true).trim().split('\n')
                     def result
                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                         result = executeCouplingStage('logical-coupling', commits)
@@ -37,7 +37,7 @@ pipeline {
         stage('Developer Coupling') {
             steps {
                 script {
-                    def commits = sh(script: 'git log --pretty=format:"%H" origin/main..HEAD', returnStdout: true).trim().split('\n')
+                    def commits = sh(script: 'git rev-list ${previousCommit}..${currentCommit}', returnStdout: true).trim().split('\n')
                     def result
                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                         result = executeCouplingStage('developer-coupling', commits)
