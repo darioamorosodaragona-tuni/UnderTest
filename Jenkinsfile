@@ -126,11 +126,11 @@ def executeCouplingStage(couplingType, commits) {
     def jsonResponse = readJSON text: response
     def exitCode = jsonResponse.exit_code
     def message = jsonResponse.message
-    def commits = jsonResponse.commits
+    def commits_to_notify = jsonResponse.commits
 
     echo "Exit Code: ${exitCode}"
     echo "Message: ${message}"
-    echo "Commits: ${commits}"
+    echo "Commits: ${commits_to_notify}"
 
-    return [exitCode: exitCode, message: message, commits: commits]
+    return [exitCode: exitCode, message: message, commits: commits_to_notify]
 }
