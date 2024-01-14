@@ -113,7 +113,7 @@ def executeCouplingStage(couplingType) {
     def response
     try {
         response = sh(script: """
-            curl -G -d 'git_url=${repoUrl}' -d 'commit_hash=${commitHash}' -d 'branch=${branchName}' ${FLASK_APP_URL}/${couplingType}
+            curl -G -d 'git_url=${repoUrl}' -d 'commits=${commitHash}' -d 'branch=${branchName}' ${FLASK_APP_URL}/${couplingType}
         """, returnStdout: true).trim()
     } catch (Exception e) {
         return [exitCode: 500, message: 'Server did not respond']
