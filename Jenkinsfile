@@ -8,6 +8,7 @@ pipeline {
         DEVELOPER_EXIT_CODE = -100
         DEVELOPER_MESSAGE = 'UNEXECUTED'
         WEBHOOK_URL = "https://abb.webhook.office.com/webhookb2/0bb87d12-694d-42e4-b1ac-8789abc7e2f9@372ee9e0-9ce0-4033-a64a-c07073a91ecd/IncomingWebhook/8c4d2fbdbad540c392bc80efafa429e4/c6c993a4-8ced-4242-9ad0-814f68c1bef7"
+    }
 
     stages {
         stage('Logical Coupling') {
