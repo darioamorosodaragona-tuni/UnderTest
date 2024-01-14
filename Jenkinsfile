@@ -120,7 +120,7 @@ def executeCouplingStage(couplingType) {
     }
 
     if (response == null) {
-        return [exitCode: 500, message: 'Server response is null']
+        return [exitCode: 500, message:'Server response is null']
     }
 
     echo "Raw Response from Flask App: ${response}"
